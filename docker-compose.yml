@@ -1,0 +1,56 @@
+version: '3'
+services:
+
+  nginx-api:
+    image: nginx:stable-alpine
+    ports:
+      - "8091:80"
+    volumes:
+      - ./api:/var/www/html
+      - ./nginx/api.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - pdrnet
+    depends_on:
+      - php-api
+    links:
+      - php-api
+
+  php-api:
+    build: ./php70/
+    #image: phpetra:php70
+    volumes:
+      - ./api:/var/www/html
+    networks:
+      - pdrnet
+    environment:
+      # same name as in PhpStorm ->PHP ->servers```
+      PHP_IDE_CONFIG: "serverName=docker"
+
+  nginx-client:
+    image: nginx:stable-alpine
+    ports:
+      - "8092:80"
+    volumes:
+      - ./client:/var/www/html
+      - ./nginx/client.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - pdrnet
+    depends_on:
+      - php-client
+    links:
+      - php-client
+
+  php-client:
+    build: ./php71/
+    #image: phpetra:php71
+    volumes:
+      - ./client:/var/www/html
+    networks:
+      - pdrnet
+    environment:
+      # same name as in PhpStorm ->PHP ->servers```
+      PHP_IDE_CONFIG: "serverName=docker"
+
+networks:
+  pdrnet:
+    driver: "bridge"
